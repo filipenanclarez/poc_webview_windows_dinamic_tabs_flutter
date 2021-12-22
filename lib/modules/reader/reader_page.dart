@@ -15,9 +15,9 @@ class ReaderPage extends StatefulWidget {
   _ReaderPageState createState() => _ReaderPageState();
 }
 
-class _ReaderPageState extends State<ReaderPage>
-    with AutomaticKeepAliveClientMixin<ReaderPage> {
-      final _controller = WebviewController();
+class _ReaderPageState extends State<
+    ReaderPage> with AutomaticKeepAliveClientMixin<ReaderPage> {
+  final _controller = WebviewController();
   // @override
   // void setState(fn) {
   //   if (mounted) super.setState(fn);
@@ -36,11 +36,16 @@ class _ReaderPageState extends State<ReaderPage>
   @override
   void initState() {
     super.initState();
-        initPlatformState();
 
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      await Future.delayed(Duration(seconds: 15));
+      if (mounted) {
+        initPlatformState();
+      }
+    });
   }
 
-    Future<void> initPlatformState() async {
+  Future<void> initPlatformState() async {
     // Optionally initialize the webview environment using
     // a custom user data directory
     // and/or a custom browser executable directory
@@ -48,7 +53,7 @@ class _ReaderPageState extends State<ReaderPage>
     //await WebviewController.initializeEnvironment(
     //    additionalArguments: '--show-fps-counter');
 
-    await Future.delayed(Duration(seconds: 15));
+    // await Future.delayed(Duration(seconds: 15));
     await _controller.initialize();
 
     _controller.url.listen((url) {
@@ -60,6 +65,8 @@ class _ReaderPageState extends State<ReaderPage>
     await _controller.loadUrl('https://flutter.dev');
 
     if (!mounted) return;
+
+    // await Future.delayed(Duration(seconds: 15));
 
     setState(() {});
   }
@@ -95,7 +102,7 @@ class _ReaderPageState extends State<ReaderPage>
     //   ),
     // );
 
-    // return const WebViewAll(      
+    // return const WebViewAll(
     //   // key: webVieWallKey,
     //   url: 'http://uol.com.br',
     // );
@@ -103,8 +110,7 @@ class _ReaderPageState extends State<ReaderPage>
     // return WebViewWindows(url:'http://uol.com.br' );
     // return Container();
 
-
-   return Scaffold(
+    return Scaffold(
       // body: Center(
       //   child: Container(
       //     // child: Text('key: ' + widget.indexKey),
@@ -116,13 +122,13 @@ class _ReaderPageState extends State<ReaderPage>
         children: [
           Text('Pressionado $counter vezes'),
           Expanded(
-            child: !_controller.value.isInitialized ? Text('Não inicializado'):Webview(
-            _controller,
-            permissionRequested: _onPermissionRequested,
+            child: !_controller.value.isInitialized
+                ? Text('Não inicializado')
+                : Webview(
+                    _controller,
+                    permissionRequested: _onPermissionRequested,
+                  ),
           ),
-          
-          
-          ),          
         ],
       ),
 
@@ -132,12 +138,13 @@ class _ReaderPageState extends State<ReaderPage>
           counter++;
           debugPrint('dentro da aba');
           setState(() {});
+          // initPlatformState();
         },
       ),
-    );    
+    );
   }
- 
- Future<WebviewPermissionDecision> _onPermissionRequested(
+
+  Future<WebviewPermissionDecision> _onPermissionRequested(
       String url, WebviewPermissionKind kind, bool isUserInitiated) async {
     final decision = await showDialog<WebviewPermissionDecision>(
       context: navigatorKey.currentContext!,
